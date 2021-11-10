@@ -6,6 +6,7 @@ import urllib.parse as p
 import re
 import os
 import pickle
+import csv
 
 SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
 
@@ -71,6 +72,7 @@ def print_video_infos(video_response):
         if d:
             duration_str += f"{d[:-1]}:"
     duration_str = duration_str.strip(":")
+    
     print(f"""\
     Title: {title}
     Channel Title: {channel_title}
@@ -82,10 +84,22 @@ def print_video_infos(video_response):
     Number of views: {view_count}
     """)
     
-video_url = "https://www.youtube.com/watch?v=sugvnHA7ElY"
+def search(youtube, **kwargs):
+    return youtube.search().list(
+        part="snippet",
+        **kwargs
+    ).execute()
 
-video_id = get_video_id_by_url(video_url)
+q = input("Enter the programming language you want to learn:") 
 
-response = get_video_details(youtube, id=video_id)
 
-print_video_infos(response)
+response = search(youtube, q = {q} , maxResults=2)
+items = response.get("items")
+for item in items:
+    
+    video_id = item["id"]["videoId"]
+    
+    video_response = get_video_details(youtube, id=video_id)
+    
+    print_video_infos(video_response)
+    print("="*50)
